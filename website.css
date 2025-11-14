@@ -79,7 +79,7 @@ nav {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(15px);
   padding: 8px 40px;
-  height: 70px;
+  height: 80px;
   position: fixed;
   width: 100%;
   top: 0;
@@ -196,14 +196,16 @@ nav {
 }
 
 .logo-icon {
-  width: 60px;
-  height: auto;
+  height: 55px;  /* Pakai height, bukan width */
+  width: auto;
+  object-fit: contain;
   animation: float 3s ease-in-out infinite;
 }
 
 .logo-text {
-  height: 60px;
+  height: 55px;
   width: auto;
+  object-fit: contain;
 }
 /* ===== HERO SECTION ===== */
 .hero {
@@ -1187,3 +1189,4 @@ footer a:hover {
     font-size: 0.75rem !important;
   }
 }
+
