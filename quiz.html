@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BlueQuiz - Pencemaran Laut</title>
+    <style>
+      /* === THEME: DARK OCEAN === */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        width: 100%;
+        font-family: "Poppins", sans-serif;
+        color: #fff;
+        background: radial-gradient(circle at bottom, #001f33, #000814);
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* === ANIMASI GELEMBUNG === */
+      .bubble {
+        position: absolute;
+        bottom: -100px;
+        background: rgba(0, 212, 255, 0.3);
+        border-radius: 50%;
+        animation: rise 10s linear infinite;
+      }
+
+      .bubble:nth-child(odd) {
+        left: 10%;
+        width: 20px;
+        height: 20px;
+        animation-delay: 0s;
+      }
+
+      .bubble:nth-child(even) {
+        left: 80%;
+        width: 30px;
+        height: 30px;
+        animation-delay: 5s;
+      }
+
+      .bubble:nth-child(3n) {
+        left: 50%;
+        width: 15px;
+        height: 15px;
+        animation-delay: 2s;
+      }
+
+      @keyframes rise {
+        to {
+          transform: translateY(-100vh);
+          opacity: 0;
+        }
+      }
+
+      /* === SCREEN CONTAINERS === */
+      .screen {
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+      }
+
+      .content {
+        text-align: center;
+        background: rgba(255, 255, 255, 0.08);
+        padding: 40px;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 600px;
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+        backdrop-filter: blur(6px);
+      }
+
+      h1 {
+        font-size: 2.5em;
+        color: #00d4ff;
+        margin-bottom: 10px;
+      }
+
+      p {
+        margin-bottom: 20px;
+        font-size: 1rem;
+        color: #d1e7f5;
+      }
+
+      /* === INPUT NAMA === */
+      input {
+        padding: 10px;
+        width: 80%;
+        max-width: 400px;
+        border-radius: 10px;
+        border: none;
+        margin-bottom: 15px;
+        font-size: 1rem;
+      }
+
+      /* === BUTTON STYLE === */
+      button {
+        background: #00bcd4;
+        border: none;
+        color: white;
+        padding: 10px 25px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 16px;
+        margin: 10px;
+        transition: 0.3s;
+      }
+
+      button:hover {
+        background: #0097a7;
+        transform: scale(1.05);
+      }
+
+      /* === LEADERBOARD === */
+      #leaderboard {
+        list-style: none;
+        padding: 0;
+        margin-top: 15px;
+        background: rgba(255, 255, 255, 0.07);
+        border-radius: 10px;
+        max-height: 180px;
+        overflow-y: auto;
+      }
+
+      #leaderboard li {
+        padding: 8px;
+        font-size: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      /* === QUIZ CONTAINER === */
+      .quiz-container {
+        text-align: center;
+        width: 90%;
+        max-width: 600px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 40px;
+        backdrop-filter: blur(6px);
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+      }
+
+      .question {
+        font-size: 1.3rem;
+        margin-bottom: 20px;
+        color: #e8f9ff;
+      }
+
+      .timer {
+        font-size: 1.1rem;
+        color: #ffd700;
+        margin-bottom: 20px;
+      }
+
+      #options button {
+        display: block;
+        width: 100%;
+        margin: 8px 0;
+        background: rgba(0, 188, 212, 0.8);
+      }
+
+      #options button:hover {
+        background: #00acc1;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- ANIMASI GELEMBUNG -->
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+
+    <!-- START SCREEN -->
+    <div class="screen" id="startScreen">
+      <div class="content">
+        <h1>BlueQuiz</h1>
+        <p>Uji pengetahuanmu tentang pencemaran laut dan ekosistem pesisir!</p>
+
+        <input type="text" id="playerName" placeholder="Masukkan nama kamu" />
+
+        <button onclick="startQuiz()">Mulai Kuis</button>
+
+        <h3>🏆 Leaderboard</h3>
+        <ul id="leaderboard"></ul>
+      </div>
+    </div>
+
+    <!-- QUIZ SCREEN -->
+    <div class="screen" id="quizScreen" style="display: none">
+      <div class="quiz-container">
+        <div class="timer">
+          ⏱️ Waktu tersisa: <span id="time">15</span> detik
+        </div>
+        <div class="question" id="question"></div>
+        <div id="options"></div>
+      </div>
+    </div>
+
+    <!-- RESULT SCREEN -->
+    <div class="screen" id="resultScreen" style="display: none">
+      <div class="content">
+        <h2>🎉 Kuis Selesai!</h2>
+        <p id="finalScore"></p>
+        <button onclick="location.reload()">Main Lagi</button>
+      </div>
+    </div>
+
+    <script>
+      const questions = [
+        {
+          q: "Apa penyebab utama pencemaran laut?",
+          options: ["Limbah industri", "Hujan asam", "Upwelling", "Tsunami"],
+          answer: "Limbah industri",
+        },
+        {
+          q: "Salah satu penyebab eutrofikasi karena manusia adalah?",
+          options: [
+            "Membuang putung rokok",
+            "Membuang limbah di danau",
+            "Menebang pohon",
+            "Pembakaran sampah",
+          ],
+          answer: "Membuang limbah di danau",
+        },
+        {
+          q: "Organisme bioindikator pencemar laut?",
+          options: ["Kerang", "Hiu", "Udang", "Tuna"],
+          answer: "Kerang",
+        },
+        {
+          q: "Sampah plastik di laut berdampak pada?",
+          options: ["Biota laut", "Lapisan ozon", "Tanah", "Iklim global"],
+          answer: "Biota laut",
+        },
+        {
+          q: "MARPOL Convention mengatur tentang?",
+          options: [
+            "Pencegahan pencemaran laut",
+            "Perdagangan ikan",
+            "Migrasi hewan laut",
+            "Cuaca ekstrem",
+          ],
+          answer: "Pencegahan pencemaran laut",
+        },
+        {
+          q: "Pencemaran minyak di laut dapat menyebabkan?",
+          options: [
+            "Kematian plankton",
+            "Kenaikan suhu",
+            "Erosi pantai",
+            "Pertumbuhan karang",
+          ],
+          answer: "Kematian plankton",
+        },
+        {
+          q: "Sampah mikroplastik sulit terurai karena?",
+          options: [
+            "Ukuran kecil & bahan sintetis",
+            "Dibakar cepat",
+            "Mudah larut air",
+            "Mudah terurai mikroba",
+          ],
+          answer: "Ukuran kecil & bahan sintetis",
+        },
+        {
+          q: "Ekosistem yang paling terdampak pencemaran laut?",
+          options: ["Terumbu karang", "Hutan bakau", "Padang rumput", "Danau"],
+          answer: "Terumbu karang",
+        },
+        {
+          q: "Zat pencemar logam berat yang sering ditemukan di laut?",
+          options: [
+            "Merkuri (Hg)",
+            "Kalsium (Ca)",
+            "Magnesium (Mg)",
+            "Oksigen (O₂)",
+          ],
+          answer: "Merkuri (Hg)",
+        },
+        {
+          q: "Cara efektif mengurangi pencemaran laut adalah?",
+          options: [
+            "Daur ulang plastik",
+            "Buang limbah ke sungai",
+            "Gunakan pestisida",
+            "Gunakan kapal besar",
+          ],
+          answer: "Daur ulang plastik",
+        },
+      ];
+
+      let current = 0;
+      let score = 0;
+      let timer;
+      let timeLeft = 15;
+      let playerName = "";
+
+      /* === Mulai Kuis === */
+      function startQuiz() {
+        playerName = document.getElementById("playerName").value.trim();
+        if (!playerName) return alert("Masukkan nama kamu dulu!");
+
+        document.getElementById("startScreen").style.display = "none";
+        document.getElementById("quizScreen").style.display = "flex";
+        showQuestion();
+      }
+
+      /* === Tampilkan Soal === */
+      function showQuestion() {
+        clearInterval(timer);
+        timeLeft = 15;
+        updateTimer();
+        timer = setInterval(countdown, 1000);
+
+        const q = questions[current];
+        document.getElementById("question").textContent = q.q;
+        const optionsEl = document.getElementById("options");
+        optionsEl.innerHTML = "";
+
+        q.options.forEach((opt) => {
+          const btn = document.createElement("button");
+          btn.textContent = opt;
+          btn.onclick = () => selectAnswer(opt);
+          optionsEl.appendChild(btn);
+        });
+      }
+
+      /* === Pilih Jawaban === */
+      function selectAnswer(opt) {
+        clearInterval(timer);
+        const correct = questions[current].answer;
+
+        if (opt === correct) score += 10;
+
+        // Otomatis lanjut setelah 1 detik
+        setTimeout(() => {
+          nextQuestion();
+        }, 1000);
+      }
+
+      /* === Timer === */
+      function countdown() {
+        timeLeft--;
+        updateTimer();
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          nextQuestion();
+        }
+      }
+
+      function updateTimer() {
+        document.getElementById("time").textContent = timeLeft;
+      }
+
+      /* === Lanjut Soal === */
+      function nextQuestion() {
+        current++;
+        if (current < questions.length) {
+          showQuestion();
+        } else {
+          endQuiz();
+        }
+      }
+
+      /* === Akhiri Kuis === */
+      function endQuiz() {
+        clearInterval(timer);
+        document.getElementById("quizScreen").style.display = "none";
+        document.getElementById("resultScreen").style.display = "flex";
+        document.getElementById(
+          "finalScore"
+        ).textContent = `${playerName}, skor kamu: ${score}`;
+
+        const leaderboard = JSON.parse(
+          localStorage.getItem("leaderboard") || "[]"
+        );
+        leaderboard.push({ name: playerName, score });
+        leaderboard.sort((a, b) => b.score - a.score);
+        localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+        showLeaderboard();
+      }
+
+      /* === Leaderboard === */
+      function showLeaderboard() {
+        const data = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+        const lb = document.getElementById("leaderboard");
+        lb.innerHTML = "";
+        data.slice(0, 5).forEach((p, i) => {
+          const li = document.createElement("li");
+          li.textContent = `${i + 1}. ${p.name} — ${p.score}`;
+          lb.appendChild(li);
+        });
+      }
+
+      /* reset */
+      localStorage.removeItem("leaderboard");
+
+      /* === Panggil Leaderboard di Awal === */
+      showLeaderboard();
+    </script>
+  </body>
+</html>
