@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Blue Alert WebGIS - Pemantauan Laut Pulau Merak Kecil</title>
 
-    <link rel="stylesheet" href="website-fixed.css" />
+    <link rel="stylesheet" href="website.css" />
 
     <link
       rel="stylesheet"
@@ -26,50 +26,43 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   </head>
   <body>
-    <!-- HEADER WITH FIXED NAVBAR -->
     <header>
-      <nav>
-        <div class="nav-container">
-          <a href="#" class="logo">
-            <img
-              src="img/logobaru.jpeg"
-              alt="Logo Blue Alert"
-              class="logo-icon"
-            />
-            <img src="img/logo2.jpeg" alt="Teks Blue Alert" class="logo-text" />
-          </a>
-          <ul class="nav-links" id="navLinks">
-            <li>
-              <a href="#hero" class="active"> <i class="fas fa-home"></i> Beranda </a>
-            </li>
-            <li>
-              <a href="#map"> <i class="fas fa-map-marked-alt"></i> Peta </a>
-            </li>
-            <li>
-              <a href="#timeline"> <i class="fas fa-clock"></i> Timeline </a>
-            </li>
-            <li>
-              <a href="#analisis">
-                <i class="fas fa-chart-line"></i> Analisis
-              </a>
-            </li>
-            <li>
-              <a href="#tentang">
-                <i class="fas fa-info-circle"></i> Tentang
-              </a>
-            </li>
-            <li>
-              <a href="#team"> <i class="fas fa-users"></i> Tim </a>
-            </li>
-          </ul>
-          <div class="menu-toggle" id="menuToggle">
-            <i class="fas fa-bars"></i>
-          </div>
+    <nav>
+      <div class="nav-container">
+        <a href="#" class="logo">
+          <img
+            src="img/logobaru.jpeg"
+            alt="Logo Blue Alert"
+            class="logo-icon"
+          />
+          <img src="img/logo2.jpeg" alt="Teks Blue Alert" class="logo-text" />
+        </a>
+        <ul class="nav-links" id="navLinks">
+          <li>
+            <a href="#hero"> <i class="fas fa-home"></i> Beranda </a>
+          </li>
+          <li>
+            <a href="#map"> <i class="fas fa-map-marked-alt"></i> Peta </a>
+          </li>
+          <li>
+            <a href="#timeline"> <i class="fas fa-clock"></i> Timeline </a>
+          </li>
+          <li>
+            <a href="#analisis"> <i class="fas fa-chart-line"></i> Analisis </a>
+          </li>
+          <li>
+            <a href="#tentang"> <i class="fas fa-info-circle"></i> Tentang </a>
+          </li>
+          <li>
+            <a href="#team"> <i class="fas fa-users"></i> Tim </a>
+          </li>
+        </ul>
+        <div class="menu-toggle" id="menuToggle">
+          <i class="fas fa-bars"></i>
         </div>
-      </nav>
+      </div>
+    </nav>
     </header>
-
-    <!-- HERO SECTION -->
     <section id="hero" class="hero">
       <div class="hero-content">
         <h1>BLUE ALERT</h1>
@@ -82,8 +75,6 @@
         </p>
       </div>
     </section>
-
-    <!-- MAP SECTION -->
     <section id="map" class="section-alt">
       <div class="container">
         <h2 class="section-title">
@@ -155,7 +146,6 @@
       </div>
     </section>
 
-    <!-- DETAIL MODAL -->
     <div id="detailModal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
@@ -199,7 +189,6 @@
       </div>
     </div>
 
-    <!-- TIMELINE SECTION -->
     <section id="timeline">
       <div class="container">
         <h2 class="section-title">
@@ -257,8 +246,6 @@
         </div>
       </div>
     </section>
-
-    <!-- ANALISIS SECTION -->
     <section id="analisis" class="section-alt">
       <div class="container">
         <h2 class="section-title">
@@ -285,7 +272,7 @@
       </div>
     </section>
 
-    <!-- TENTANG SECTION -->
+    <!-- ===== TENTANG SECTION ===== -->
     <section id="tentang">
       <div class="container">
         <h2 class="section-title">
@@ -343,7 +330,6 @@
       </div>
     </section>
 
-    <!-- TEAM SECTION -->
     <section id="team" class="section-alt">
       <div class="container">
         <h2 class="section-title">
@@ -384,82 +370,15 @@
       </div>
     </section>
 
-    <!-- FOOTER -->
     <footer>
       <p>&copy; 2025 Blue Alert WebGIS.</p>
     </footer>
 
-    <!-- SCROLL TO TOP BUTTON -->
     <div class="scroll-top" id="scrollTop">
       <i class="fas fa-arrow-up"></i>
     </div>
 
-    <!-- SCRIPTS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="website.js"></script>
-    <script>
-      // Mobile Menu Toggle
-      const menuToggle = document.getElementById('menuToggle');
-      const navLinks = document.getElementById('navLinks');
-
-      menuToggle.addEventListener('click', () => {
-        navLinks.classList.toggle('active');
-        const icon = menuToggle.querySelector('i');
-        if (navLinks.classList.contains('active')) {
-          icon.classList.remove('fa-bars');
-          icon.classList.add('fa-times');
-        } else {
-          icon.classList.remove('fa-times');
-          icon.classList.add('fa-bars');
-        }
-      });
-
-      // Close mobile menu when link is clicked
-      document.querySelectorAll('.nav-links a').forEach(link => {
-        link.addEventListener('click', () => {
-          navLinks.classList.remove('active');
-          const icon = menuToggle.querySelector('i');
-          icon.classList.remove('fa-times');
-          icon.classList.add('fa-bars');
-        });
-      });
-
-      // Active nav link on scroll
-      window.addEventListener('scroll', () => {
-        let current = '';
-        const sections = document.querySelectorAll('section');
-        
-        sections.forEach(section => {
-          const sectionTop = section.offsetTop;
-          const sectionHeight = section.clientHeight;
-          if (scrollY >= (sectionTop - 200)) {
-            current = section.getAttribute('id');
-          }
-        });
-
-        document.querySelectorAll('.nav-links a').forEach(link => {
-          link.classList.remove('active');
-          if (link.getAttribute('href').slice(1) === current) {
-            link.classList.add('active');
-          }
-        });
-
-        // Scroll to top button
-        const scrollTop = document.getElementById('scrollTop');
-        if (window.scrollY > 300) {
-          scrollTop.classList.add('active');
-        } else {
-          scrollTop.classList.remove('active');
-        }
-      });
-
-      // Scroll to top functionality
-      document.getElementById('scrollTop').addEventListener('click', () => {
-        window.scrollTo({
-          top: 0,
-          behavior: 'smooth'
-        });
-      });
-    </script>
   </body>
 </html>
