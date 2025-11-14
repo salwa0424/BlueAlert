@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blue Alert WebGIS - Pemantauan Laut Pulau Merak Kecil</title>
+
+    <link rel="stylesheet" href="website.css" />
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  </head>
+  <body>
+    <nav>
+      <div class="nav-container">
+        <a href="#" class="logo">
+          <img
+            src="img/logobaru.jpeg"
+            alt="Logo Blue Alert"
+            class="logo-icon"
+          />
+          <img src="img/logo2.jpeg" alt="Teks Blue Alert" class="logo-text" />
+        </a>
+        <ul class="nav-links" id="navLinks">
+          <li>
+            <a href="#hero"> <i class="fas fa-home"></i> Beranda </a>
+          </li>
+          <li>
+            <a href="#map"> <i class="fas fa-map-marked-alt"></i> Peta </a>
+          </li>
+          <li>
+            <a href="#timeline"> <i class="fas fa-clock"></i> Timeline </a>
+          </li>
+          <li>
+            <a href="#analisis"> <i class="fas fa-chart-line"></i> Analisis </a>
+          </li>
+          <li>
+            <a href="#tentang"> <i class="fas fa-info-circle"></i> Tentang </a>
+          </li>
+          <li>
+            <a href="#team"> <i class="fas fa-users"></i> Tim </a>
+          </li>
+        </ul>
+        <div class="menu-toggle" id="menuToggle">
+          <i class="fas fa-bars"></i>
+        </div>
+      </div>
+    </nav>
+    <section id="hero" class="hero">
+      <div class="hero-content">
+        <h1>BLUE ALERT</h1>
+        <p class="subtitle">Banten Littoral Update on Ecology</p>
+        <p class="subtitle">Alerting Local Environmental Risk Tracker</p>
+        <p>
+          Sistem Informasi Geografis untuk Pemantauan Kualitas Air Laut di Pulau
+          Merak Kecil, Banten. Menampilkan data parameter DO, Suhu, Salinitas,
+          dan Klorofil-a dari tahun 2022 hingga 2025.
+        </p>
+      </div>
+    </section>
+    <section id="map" class="section-alt">
+      <div class="container">
+        <h2 class="section-title">
+          <i class="fas fa-map-marked-alt"></i> Peta Interaktif Pulau Merak
+          Kecil
+        </h2>
+        <div class="map-controls">
+          <div class="control-group">
+            <label><i class="fas fa-calendar-alt"></i> Tahun Pengamatan</label>
+            <input
+              type="range"
+              id="yearSlider"
+              class="year-slider"
+              min="2022"
+              max="2025"
+              value="2025"
+              step="1"
+            />
+            <div class="year-display">
+              <span>2022</span>
+              <span>2023</span>
+              <span>2024</span>
+              <span>2025</span>
+            </div>
+            <div class="current-year" id="currentYear">2025</div>
+          </div>
+          <div class="play-controls">
+            <button class="btn" id="playBtn">
+              <i class="fas fa-play"></i> Mulai Animasi
+            </button>
+            <button class="btn" id="stopBtn" style="display: none">
+              <i class="fas fa-pause"></i> Jeda Animasi
+            </button>
+          </div>
+        </div>
+        <div class="map-container">
+          <div id="mapLeaflet"></div>
+        </div>
+        <div class="legend">
+          <h3><i class="fas fa-info-circle"></i> Status Kualitas Air</h3>
+          <div class="legend-items">
+            <div class="legend-item">
+              <div
+                class="legend-color"
+                style="background-color: var(--safe-green)"
+              ></div>
+              Baik (DO > 6 mg/L)
+            </div>
+            <div class="legend-item">
+              <div
+                class="legend-color"
+                style="background-color: var(--warning-yellow)"
+              ></div>
+              Waspada (DO 5-6 mg/L)
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #ff7043"></div>
+              Tercemar Ringan (DO 4-5 mg/L)
+            </div>
+            <div class="legend-item">
+              <div
+                class="legend-color"
+                style="background-color: var(--danger-red)"
+              ></div>
+              Tercemar Berat (DO < 4 mg/L)
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="detailModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>
+            <i class="fas fa-chart-bar"></i> Detail Parameter Kualitas Air
+          </h2>
+          <span class="close" onclick="closeDetailModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="parameter-selector">
+            <div class="parameter-btn" data-param="do">
+              <i class="fas fa-tint"></i>
+              <div class="param-name">Dissolved Oxygen (DO)</div>
+              <div class="param-value" id="doValue">-</div>
+            </div>
+            <div class="parameter-btn" data-param="temp">
+              <i class="fas fa-thermometer-half"></i>
+              <div class="param-name">Suhu Air</div>
+              <div class="param-value" id="tempValue">-</div>
+            </div>
+            <div class="parameter-btn" data-param="salinity">
+              <i class="fas fa-water"></i>
+              <div class="param-name">Salinitas</div>
+              <div class="param-value" id="salinityValue">-</div>
+            </div>
+            <div class="parameter-btn" data-param="chlorophyll">
+              <i class="fas fa-leaf"></i>
+              <div class="param-name">Klorofil-a</div>
+              <div class="param-value" id="chlorophyllValue">-</div>
+            </div>
+          </div>
+          <div id="detailMap"></div>
+          <div class="detail-legend">
+            <h3 id="legendTitle">
+              <i class="fas fa-palette"></i> Skala Nilai Parameter
+            </h3>
+            <div class="gradient-bar" id="gradientBar"></div>
+            <div class="gradient-labels" id="gradientLabels"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section id="timeline">
+      <div class="container">
+        <h2 class="section-title">
+          <i class="fas fa-clock"></i> Timeline Perubahan Kualitas Air
+        </h2>
+        <div class="timeline">
+          <div class="timeline-item">
+            <h2 class="timeline-year">2022</h2>
+            <p><b>Rata-rata DO:</b> 6.75 mg/L</p>
+            <p><b>Rata-rata Suhu:</b> 28.3 °C</p>
+            <p><b>Status:</b> <span class="status">Baik</span></p>
+            <p>
+              Baseline pengukuran dimulai dengan kondisi awal yang relatif baik.
+            </p>
+          </div>
+          <div class="timeline-item">
+            <h2 class="timeline-year">2023</h2>
+            <p><b>Rata-rata DO:</b> 6.57 mg/L</p>
+            <p><b>Rata-rata Suhu:</b> 28.9 °C</p>
+            <p><b>Status:</b> <span class="status">Baik</span></p>
+            <p>
+              Terjadi sedikit peningkatan suhu namun DO masih dalam batas aman.
+            </p>
+          </div>
+          <div class="timeline-item">
+            <h2 class="timeline-year">2024</h2>
+            <p><b>Rata-rata DO:</b> 6.32 mg/L</p>
+            <p><b>Rata-rata Suhu:</b> 29.2 °C</p>
+            <p>
+              <b>Status:</b>
+              <span class="status" style="background: #ffa726; color: white"
+                >Sedang</span
+              >
+            </p>
+            <p>
+              Peningkatan suhu signifikan mulai mempengaruhi kualitas oksigen
+              terlarut.
+            </p>
+          </div>
+          <div class="timeline-item">
+            <h2 class="timeline-year">2025 (Prediksi)</h2>
+            <p><b>Rata-rata DO:</b> 6.10 mg/L</p>
+            <p><b>Rata-rata Suhu:</b> 29.6 °C</p>
+            <p>
+              <b>Status:</b>
+              <span class="status" style="background: #ff7043; color: white"
+                >Waspada</span
+              >
+            </p>
+            <p>
+              Tren penurunan DO terus berlanjut, memerlukan perhatian serius
+              terhadap potensi pencemaran.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section id="analisis" class="section-alt">
+      <div class="container">
+        <h2 class="section-title">
+          <i class="fas fa-chart-line"></i> Analisis Tren Data Tahunan
+        </h2>
+        <div class="charts-grid">
+          <div class="chart-container">
+            <h3>Tren Dissolved Oxygen (DO)</h3>
+            <canvas id="doChart"></canvas>
+          </div>
+          <div class="chart-container">
+            <h3>Tren Suhu Air</h3>
+            <canvas id="tempChart"></canvas>
+          </div>
+          <div class="chart-container">
+            <h3>Tren Salinitas</h3>
+            <canvas id="salinityChart"></canvas>
+          </div>
+          <div class="chart-container">
+            <h3>Tren Klorofil-a</h3>
+            <canvas id="chlorophyllChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TENTANG SECTION ===== -->
+    <section id="tentang">
+      <div class="container">
+        <h2 class="section-title">
+          <i class="fas fa-info-circle"></i> Tentang Proyek
+        </h2>
+        <div class="about-content">
+          <p>
+            WebGIS Pencemaran Laut Pulau Merak Kecil adalah sistem informasi
+            geografis berbasis web yang dirancang untuk memantau dan
+            menganalisis kualitas air laut di sekitar Pulau Merak Kecil, Banten.
+          </p>
+
+          <h3><i class="fas fa-map-marker-alt"></i> Lokasi Penelitian</h3>
+          <p><strong>Koordinat:</strong> -5.941944, 105.997500</p>
+          <p>
+            <strong>Lokasi:</strong> Pulau Merak Kecil, Kecamatan Pulo Merak,
+            Kota Cilegon, Banten
+          </p>
+
+          <h3><i class="fas fa-vial"></i> Parameter Yang Dipantau</h3>
+          <ul>
+            <li>
+              <strong>Dissolved Oxygen (DO):</strong> Mengukur kadar oksigen
+              terlarut dalam air (mg/L)
+            </li>
+            <li><strong>Suhu:</strong> Mengukur temperatur air laut (°C)</li>
+            <li>
+              <strong>Salinitas:</strong> Mengukur kadar garam dalam air laut
+              (PSU)
+            </li>
+            <li>
+              <strong>Klorofil-a:</strong> Mengukur konsentrasi klorofil sebagai
+              indikator fitoplankton (μg/L)
+            </li>
+          </ul>
+
+          <h3><i class="fas fa-calendar-check"></i> Periode Data</h3>
+          <p>
+            Data yang ditampilkan mencakup pengukuran bulanan dari tahun 2022
+            hingga 2025, memberikan gambaran komprehensif tentang perubahan
+            kualitas air laut dari waktu ke waktu.
+          </p>
+
+          <h3><i class="fas fa-bullseye"></i> Tujuan</h3>
+          <p>Proyek ini bertujuan untuk:</p>
+          <ul>
+            <li>Memantau kualitas air laut secara real-time</li>
+            <li>Mendeteksi tren pencemaran laut</li>
+            <li>Memberikan informasi visual yang mudah dipahami</li>
+            <li>
+              Mendukung pengambilan keputusan dalam pengelolaan lingkungan laut
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="team" class="section-alt">
+      <div class="container">
+        <h2 class="section-title">
+          <i class="fas fa-users"></i> Tim Pengembang
+        </h2>
+        <div class="team-section">
+          <div class="team-left">
+            <div class="member-card">
+              <img src="img/salwa.jpeg" alt="Salwa Rahmadina" />
+              <h3>Salwa Rahmadina</h3>
+              <p>Sistem Informasi Kelautan</p>
+            </div>
+            <div class="member-card">
+              <img src="img/dedat.jpeg" alt="Muhammad Akbar Deedat" />
+              <h3>Muhammad Akbar Deedat</h3>
+              <p>Sistem Informasi Kelautan</p>
+            </div>
+            <div class="member-card">
+              <img src="img/salsa.jpeg" alt="Salsabila" />
+              <h3>Salsabila</h3>
+              <p>Sistem Informasi Kelautan</p>
+            </div>
+            <div class="member-card">
+              <img src="img/Ali.jpeg" alt="Muhammad Ali" />
+              <h3>Muhammad Ali</h3>
+              <p>Sistem Informasi Kelautan</p>
+            </div>
+          </div>
+          <div class="team-right">
+            <h2>Masukan & Saran</h2>
+            <p>
+              Scan QR di bawah ini untuk memberikan saran atau masukan mengenai
+              proyek kami.
+            </p>
+            <img src="img/qr saran.png" alt="QR Saran" class="qr-code" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>&copy; 2025 Blue Alert WebGIS.</p>
+    </footer>
+
+    <div class="scroll-top" id="scrollTop">
+      <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="website.js"></script>
+  </body>
+</html>
