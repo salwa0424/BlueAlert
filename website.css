@@ -1131,7 +1131,6 @@ footer a:hover {
   }
   .nav-links.active {
     display: flex;
-    z-index: 1000;
   }
   .nav-links a {
     padding: 1rem;
