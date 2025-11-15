@@ -84,7 +84,7 @@ const getStatus = (doValue) => {
 
 // >>> GANTI BAGIAN INI DENGAN DATA GEOJSON LENGKAP DARI FILE GABUNGANK25.HTML <<<
 // Data GeoJSON lengkap Anda (yang diapit tag <script> di gabunganK25.html) harus diletakkan di dalam kurung kurawal di bawah.
-const geojsonk25 = {
+const geojsonTSS25 = {
  type: "FeatureCollection",
   features: [
     {
@@ -892,17 +892,17 @@ const getLabel = (d) => {
 
 let geoJsonLayer = null;
 
-const loadGeoJsonk25 = (map) => {
+const loadGeoJsonTSS25 = (map) => {
   if (geoJsonLayer) {
     map.removeLayer(geoJsonLayer);
   }
 
   if (
-    Object.keys(geojsonk25).length > 0 &&
+    Object.keys(geojsonTSS25).length > 0 &&
     geojsonTSS25.features &&
     geojsonTSS25.features.length > 0
   ) {
-    geoJsonLayer = L.geoJson(geojsonk25, {
+    geoJsonLayer = L.geoJson(geojsonTSS25, {
       style: function (feature) {
         return {
           fillColor: getColor(feature.properties.gridcode),
@@ -1242,7 +1242,7 @@ const updateLegendTSS = () => {
 
   // Masukkan konten legenda GeoJSON ke dalam gradientLabels
   {
-    const layerGeoJson = L.geoJSON(k25, {
+    const layerGeoJson = L.geoJSON(t25, {
       style: function (feature) {
         return {
           fillColor: getColor(feature.properties.gridcode),
@@ -1377,7 +1377,7 @@ const updateDetailMap = (param) => {
   if (param === "chlorophyll" && currentYearData.year === "2025") {
     // KASUS 1: Parameter Klorofil-a (TSS) di tahun 2025 -> Tampilkan GeoJSON (output gabunganK25)
     if (
-      Object.keys(geojsonk25).length > 0 &&
+      Object.keys(geojsonTSS25).length > 0 &&
       geojsonTSS25.features &&
       geojsonTSS25.features.length > 0
     ) {
@@ -1619,3 +1619,46 @@ if (initialData) {
 
 
 
+/* ===== MOBILE MENU TOGGLE ===== */
+document.addEventListener('DOMContentLoaded', function() {
+  const menuToggle = document.getElementById('menuToggle');
+  const navLinks = document.getElementById('navLinks');
+  
+  if (menuToggle && navLinks) {
+    menuToggle.addEventListener('click', function() {
+      navLinks.classList.toggle('active');
+      
+      // Ubah icon dari bars ke times
+      const icon = this.querySelector('i');
+      if (navLinks.classList.contains('active')) {
+        icon.classList.remove('fa-bars');
+        icon.classList.add('fa-times');
+      } else {
+        icon.classList.remove('fa-times');
+        icon.classList.add('fa-bars');
+      }
+    });
+    
+    // Tutup menu saat link diklik
+    const links = navLinks.querySelectorAll('a');
+    links.forEach(link => {
+      link.addEventListener('click', function() {
+        navLinks.classList.remove('active');
+        const icon = menuToggle.querySelector('i');
+        icon.classList.remove('fa-times');
+        icon.classList.add('fa-bars');
+      });
+    });
+    
+    // Tutup menu saat klik di luar
+    document.addEventListener('click', function(event) {
+      const isClickInside = navLinks.contains(event.target) || menuToggle.contains(event.target);
+      if (!isClickInside && navLinks.classList.contains('active')) {
+        navLinks.classList.remove('active');
+        const icon = menuToggle.querySelector('i');
+        icon.classList.remove('fa-times');
+        icon.classList.add('fa-bars');
+      }
+    });
+  }
+});
