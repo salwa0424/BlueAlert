@@ -892,17 +892,17 @@ const getLabel = (d) => {
 
 let geoJsonLayer = null;
 
-const loadGeoJsonTSS25 = (map) => {
+const loadGeoJsonk25 = (map) => {
   if (geoJsonLayer) {
     map.removeLayer(geoJsonLayer);
   }
 
   if (
-    Object.keys(geojsonTSS25).length > 0 &&
+    Object.keys(geojsonk25).length > 0 &&
     geojsonTSS25.features &&
     geojsonTSS25.features.length > 0
   ) {
-    geoJsonLayer = L.geoJson(geojsonTSS25, {
+    geoJsonLayer = L.geoJson(geojsonk25, {
       style: function (feature) {
         return {
           fillColor: getColor(feature.properties.gridcode),
@@ -1242,7 +1242,7 @@ const updateLegendTSS = () => {
 
   // Masukkan konten legenda GeoJSON ke dalam gradientLabels
   {
-    const layerGeoJson = L.geoJSON(t25, {
+    const layerGeoJson = L.geoJSON(k25, {
       style: function (feature) {
         return {
           fillColor: getColor(feature.properties.gridcode),
@@ -1377,7 +1377,7 @@ const updateDetailMap = (param) => {
   if (param === "chlorophyll" && currentYearData.year === "2025") {
     // KASUS 1: Parameter Klorofil-a (TSS) di tahun 2025 -> Tampilkan GeoJSON (output gabunganK25)
     if (
-      Object.keys(geojsonTSS25).length > 0 &&
+      Object.keys(geojsonk25).length > 0 &&
       geojsonTSS25.features &&
       geojsonTSS25.features.length > 0
     ) {
@@ -1615,6 +1615,7 @@ if (initialData) {
   document.getElementById("chlorophyllValue").textContent =
     initialData.chlorophyll + " μg/L";
 }
+
 
 
 
