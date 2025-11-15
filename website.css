@@ -78,7 +78,7 @@ body {
 nav {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(15px);
-  padding: 8px 40px;
+  padding: 0 40px;
   height: 80px;
   position: fixed;
   width: 100%;
@@ -86,6 +86,8 @@ nav {
   z-index: 9999;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   border-bottom: 2px solid var(--sea-foam);
+  display: flex; /* ← TAMBAH: untuk vertical center */
+  align-items: center; /* ← TAMBAH: vertical center semua isi navbar */
 }
 
 .nav-container {
@@ -94,6 +96,7 @@ nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 100%; /* ← TAMBAH: full height */
 }
 
 .navbar a {
@@ -238,7 +241,7 @@ nav {
 /* ===== RESPONSIVE NAVBAR - MOBILE ===== */
 @media (max-width: 768px) {
   nav {
-    padding: 8px 15px;
+     padding: 0 15px; /* ← PENTING: 0 padding top/bottom */
     height: 70px; /* Kurangi tinggi navbar di mobile */
   }
   
@@ -1287,5 +1290,6 @@ footer a:hover {
     font-size: 0.75rem !important;
   }
 }
+
 
 
