@@ -78,7 +78,7 @@ body {
 nav {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(15px);
-  padding: 0 40px;
+  padding: 8px 40px;
   height: 80px;
   position: fixed;
   width: 100%;
@@ -86,8 +86,6 @@ nav {
   z-index: 9999;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   border-bottom: 2px solid var(--sea-foam);
-  display: flex; /* ← TAMBAH: untuk vertical center */
-  align-items: center; /* ← TAMBAH: vertical center semua isi navbar */
 }
 
 .nav-container {
@@ -96,7 +94,6 @@ nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 100%; /* ← TAMBAH: full height */
 }
 
 .navbar a {
@@ -210,103 +207,6 @@ nav {
   width: auto;
   object-fit: contain;
 }
-
-/* ===== FIX UNTUK NAVBAR MOBILE ===== */
-/* Tambahkan CSS ini ke file website.css kamu */
-
-/* Logo styling - Desktop */
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--ocean-blue);
-  text-decoration: none;
-}
-
-.logo-icon {
-  height: 50px;
-  width: auto;
-  object-fit: contain;
-  animation: float 3s ease-in-out infinite;
-}
-
-.logo-text {
-  height: 50px;
-  width: auto;
-  object-fit: contain;
-}
-
-/* ===== RESPONSIVE NAVBAR - MOBILE ===== */
-@media (max-width: 768px) {
-  nav {
-     padding: 0 15px; /* ← PENTING: 0 padding top/bottom */
-    height: 70px; /* Kurangi tinggi navbar di mobile */
-  }
-  
-  .logo {
-    gap: 5px; /* Kurangi jarak antara logo dan text */
-  }
-  
-  .logo-icon {
-    height: 40px; /* Perkecil logo icon di mobile */
-    width: auto;
-  }
-  
-  .logo-text {
-    height: 35px; /* Perkecil logo text di mobile */
-    width: auto;
-    max-width: 200px; /* Batasi lebar maksimal */
-  }
-  
-  .menu-toggle {
-    font-size: 1.5rem; /* Perkecil icon hamburger */
-  }
-}
-
-/* Extra small devices (< 576px) */
-@media (max-width: 576px) {
-  nav {
-    padding: 5px 10px;
-    height: 65px;
-  }
-  
-  .logo {
-    gap: 3px;
-  }
-  
-  .logo-icon {
-    height: 35px; /* Lebih kecil lagi untuk HP kecil */
-  }
-  
-  .logo-text {
-    height: 30px;
-    max-width: 150px;
-  }
-  
-  .menu-toggle {
-    font-size: 1.3rem;
-  }
-}
-
-/* Very small devices (< 400px) */
-@media (max-width: 400px) {
-  nav {
-    padding: 5px 8px;
-    height: 60px;
-  }
-  
-  .logo-icon {
-    height: 32px;
-  }
-  
-  .logo-text {
-    height: 28px;
-    max-width: 130px;
-  }
-}
-
 /* ===== HERO SECTION ===== */
 .hero {
   min-height: 100vh;
@@ -1290,6 +1190,3 @@ footer a:hover {
     font-size: 0.75rem !important;
   }
 }
-
-
-
