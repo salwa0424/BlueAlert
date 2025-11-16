@@ -2,6 +2,7 @@ let map = null; // Map utama
 let marker = null;
 let detailMap = null; // Map di modal
 let detailCircle = null;
+let detailGeoJsonLayer = null; // Layer GeoJSON untuk modal
 let animationInterval = null;
 let currentAnimationFrame = 2022; // Mulai dari tahun awal
 
@@ -85,7 +86,7 @@ const getStatus = (doValue) => {
 // >>> GANTI BAGIAN INI DENGAN DATA GEOJSON LENGKAP DARI FILE GABUNGANK25.HTML <<<
 // Data GeoJSON lengkap Anda (yang diapit tag <script> di gabunganK25.html) harus diletakkan di dalam kurung kurawal di bawah.
 const geojsonTSS25 = {
- type: "FeatureCollection",
+  type: "FeatureCollection",
   features: [
     {
       type: "Feature",
@@ -1072,8 +1073,8 @@ const updateMap = (year) => {
             <hr style="border: 1px solid #5ba8c4; margin: 12px 0;">
             <div style="margin: 12px 0;">
               <p style="margin: 6px 0; font-size: 0.9rem;"><strong>💧 DO:</strong> ${avgData.do} mg/L</p>
-              <p style="margin: 6px 0; font-size: 0.9rem;"><strong>🌡️ Suhu:</strong> ${avgData.temp} °C</p>
-              <p style="margin: 6px 0; font-size: 0.9rem;"><strong>🌊 Salinitas:</strong> ${avgData.salinity} PSU</p>
+              <p style="margin: 6px 0; font-size: 0.9rem;"><strong>🌡️ SPL:</strong> ${avgData.temp} °C</p>
+              <p style="margin: 6px 0; font-size: 0.9rem;"><strong>🌊 TSS:</strong> ${avgData.salinity} PSU</p>
               <p style="margin: 6px 0; font-size: 0.9rem;"><strong>🌿 Klorofil-a:</strong> ${avgData.chlorophyll} μg/L</p>
             </div>
             <div style="margin: 12px 0; padding: 10px; background: ${status.color}; border-radius: 8px; text-align: center; color: white; font-weight: bold; font-size: 0.9rem;">
@@ -1357,46 +1358,129 @@ const showDefaultMarker = (param, currentYearData) => {
 };
 
 /* ===== UPDATE DETAIL MAP (MODIFIED) ===== */
+// REPLACE fungsi updateDetailMap yang ada dengan ini:
+
 const updateDetailMap = (param) => {
-  // 1. Hapus semua layer GeoJSON dan Circle yang mungkin ada sebelumnya
-  if (detailCircle) {
+  const year = document.getElementById("yearSlider").value;
+
+  // Hapus layer lama (circle atau GeoJSON)
+  if (detailCircle && detailMap) {
     detailMap.removeLayer(detailCircle);
     detailCircle = null;
   }
-  if (geoJsonLayer) {
-    detailMap.removeLayer(geoJsonLayer);
-    geoJsonLayer = null;
+  if (detailGeoJsonLayer && detailMap) {
+    detailMap.removeLayer(detailGeoJsonLayer);
+    detailGeoJsonLayer = null;
   }
 
   const currentYearData = allData.find(
-    (d) =>
-      d.year == document.getElementById("yearSlider").value && d.month === "Des"
+    (d) => d.year == year && d.month === "Des"
   );
 
-  // 2. Tentukan tampilan: GeoJSON untuk Klorofil-a 2025 atau Circle untuk lainnya
-  if (param === "chlorophyll" && currentYearData.year === "2025") {
-    // KASUS 1: Parameter Klorofil-a (TSS) di tahun 2025 -> Tampilkan GeoJSON (output gabunganK25)
-    if (
-      Object.keys(geojsonTSS25).length > 0 &&
-      geojsonTSS25.features &&
-      geojsonTSS25.features.length > 0
-    ) {
-      loadGeoJsonTSS25(detailMap); // Load GeoJSON
-      updateLegendTSS(); // Update legend khusus TSS
-    } else {
-      // Jika data GeoJSON kosong (placeholder belum diisi)
-      console.warn("GeoJSON data is empty. Showing default marker instead.");
-      showDefaultMarker(param, currentYearData);
-      updateLegend(param);
+  if (!currentYearData) return;
+
+  // Cek apakah parameter ini perlu GeoJSON atau Circle
+  if (param === "do") {
+    // DO = CIRCLE (tidak berubah)
+    const paramValue = currentYearData[param];
+    const paramColor = getParameterColor(param, paramValue);
+
+    detailCircle = L.circle([-5.941944, 105.9975], {
+      color: paramColor,
+      fillColor: paramColor,
+      fillOpacity: 0.5,
+      radius: 500,
+    }).addTo(detailMap);
+
+    detailCircle.bindPopup(`
+      <div style="font-family: Poppins;">
+        <strong>DO</strong><br>
+        Nilai: ${paramValue} mg/L
+      </div>
+    `);
+
+    detailMap.setView([-5.941944, 105.9975], 13);
+  } else if (param === "chlorophyll") {
+    // KLOROFIL-A = GEOJSON
+    const loaded = loadGeoJSONLayer(
+      "Klorofil-a",
+      "chlorophyll",
+      year,
+      "🌿",
+      "Klorofil-a",
+      "Konsentrasi Klorofil-a"
+    );
+
+    if (!loaded) {
+      // Fallback ke circle jika data tidak ada
+      const paramValue = currentYearData[param];
+      const paramColor = getParameterColor(param, paramValue);
+
+      detailCircle = L.circle([-5.941944, 105.9975], {
+        color: paramColor,
+        fillColor: paramColor,
+        fillOpacity: 0.5,
+        radius: 500,
+      }).addTo(detailMap);
+
+      detailMap.setView([-5.941944, 105.9975], 13);
     }
-  } else {
-    // KASUS 2: Parameter lain atau Klorofil-a di tahun selain 2025 -> Tampilkan Circle default
-    showDefaultMarker(param, currentYearData);
-    updateLegend(param); // Update legend default
+  } else if (param === "temp") {
+    // TEMP (SPL) = GEOJSON
+    const loaded = loadGeoJSONLayer(
+      "SPL",
+      "temp",
+      year,
+      "🌡️",
+      "SPL",
+      "Suhu Permukaan Laut"
+    );
+
+    if (!loaded) {
+      // Fallback ke circle
+      const paramValue = currentYearData[param];
+      const paramColor = getParameterColor(param, paramValue);
+
+      detailCircle = L.circle([-5.941944, 105.9975], {
+        color: paramColor,
+        fillColor: paramColor,
+        fillOpacity: 0.5,
+        radius: 500,
+      }).addTo(detailMap);
+
+      detailMap.setView([-5.941944, 105.9975], 13);
+    }
+  } else if (param === "salinity") {
+    // SALINITY (TSS) = GEOJSON
+    const loaded = loadGeoJSONLayer(
+      "TSS",
+      "salinity",
+      year,
+      "💧",
+      "TSS",
+      "Total Suspended Solids"
+    );
+
+    if (!loaded) {
+      // Fallback ke circle
+      const paramValue = currentYearData[param];
+      const paramColor = getParameterColor(param, paramValue);
+
+      detailCircle = L.circle([-5.941944, 105.9975], {
+        color: paramColor,
+        fillColor: paramColor,
+        fillOpacity: 0.5,
+        radius: 500,
+      }).addTo(detailMap);
+
+      detailMap.setView([-5.941944, 105.9975], 13);
+    }
   }
 
-  // 3. Memastikan map set view tetap di pusat
-  detailMap.setView([-5.941944, 105.9975], 13);
+  // Update legend (gunakan fungsi yang sudah ada)
+  if (typeof updateLegend === "function") {
+    updateLegend(param);
+  }
 };
 
 /* ===== PARAMETER BUTTON CLICK ===== */
@@ -1616,49 +1700,194 @@ if (initialData) {
     initialData.chlorophyll + " μg/L";
 }
 
-
-
-
 /* ===== MOBILE MENU TOGGLE ===== */
-document.addEventListener('DOMContentLoaded', function() {
-  const menuToggle = document.getElementById('menuToggle');
-  const navLinks = document.getElementById('navLinks');
-  
+document.addEventListener("DOMContentLoaded", function () {
+  const menuToggle = document.getElementById("menuToggle");
+  const navLinks = document.getElementById("navLinks");
+
   if (menuToggle && navLinks) {
-    menuToggle.addEventListener('click', function() {
-      navLinks.classList.toggle('active');
-      
+    menuToggle.addEventListener("click", function () {
+      navLinks.classList.toggle("active");
+
       // Ubah icon dari bars ke times
-      const icon = this.querySelector('i');
-      if (navLinks.classList.contains('active')) {
-        icon.classList.remove('fa-bars');
-        icon.classList.add('fa-times');
+      const icon = this.querySelector("i");
+      if (navLinks.classList.contains("active")) {
+        icon.classList.remove("fa-bars");
+        icon.classList.add("fa-times");
       } else {
-        icon.classList.remove('fa-times');
-        icon.classList.add('fa-bars');
+        icon.classList.remove("fa-times");
+        icon.classList.add("fa-bars");
       }
     });
-    
+
     // Tutup menu saat link diklik
-    const links = navLinks.querySelectorAll('a');
-    links.forEach(link => {
-      link.addEventListener('click', function() {
-        navLinks.classList.remove('active');
-        const icon = menuToggle.querySelector('i');
-        icon.classList.remove('fa-times');
-        icon.classList.add('fa-bars');
+    const links = navLinks.querySelectorAll("a");
+    links.forEach((link) => {
+      link.addEventListener("click", function () {
+        navLinks.classList.remove("active");
+        const icon = menuToggle.querySelector("i");
+        icon.classList.remove("fa-times");
+        icon.classList.add("fa-bars");
       });
     });
-    
+
     // Tutup menu saat klik di luar
-    document.addEventListener('click', function(event) {
-      const isClickInside = navLinks.contains(event.target) || menuToggle.contains(event.target);
-      if (!isClickInside && navLinks.classList.contains('active')) {
-        navLinks.classList.remove('active');
-        const icon = menuToggle.querySelector('i');
-        icon.classList.remove('fa-times');
-        icon.classList.add('fa-bars');
+    document.addEventListener("click", function (event) {
+      const isClickInside =
+        navLinks.contains(event.target) || menuToggle.contains(event.target);
+      if (!isClickInside && navLinks.classList.contains("active")) {
+        navLinks.classList.remove("active");
+        const icon = menuToggle.querySelector("i");
+        icon.classList.remove("fa-times");
+        icon.classList.add("fa-bars");
       }
     });
   }
 });
+/* ===== FUNGSI-FUNGSI GEOJSON - TAMBAHKAN DI AKHIR FILE ===== */
+
+// Fungsi untuk mendapatkan warna berdasarkan gridcode
+const getGeoJSONColor = (gridcode) => {
+  switch (gridcode) {
+    case 1:
+      return "#0000FF"; // Biru - Sangat Rendah
+    case 2:
+      return "#00FFFF"; // Cyan - Rendah
+    case 3:
+      return "#00FF00"; // Hijau - Sedang
+    case 4:
+      return "#FFFF00"; // Kuning - Tinggi
+    case 5:
+      return "#FF0000"; // Merah - Sangat Tinggi
+    default:
+      return "#808080";
+  }
+};
+
+// Fungsi untuk mendapatkan label kategori
+const getGeoJSONLabel = (gridcode) => {
+  switch (gridcode) {
+    case 1:
+      return "Sangat Rendah";
+    case 2:
+      return "Rendah";
+    case 3:
+      return "Sedang";
+    case 4:
+      return "Tinggi";
+    case 5:
+      return "Sangat Tinggi";
+    default:
+      return "Tidak ada data";
+  }
+};
+
+// Fungsi generik untuk load GeoJSON layer
+const loadGeoJSONLayer = (
+  paramName,
+  varPrefix,
+  year,
+  emoji,
+  title,
+  description
+) => {
+  // Hapus layer lama
+  if (detailGeoJsonLayer && detailMap) {
+    detailMap.removeLayer(detailGeoJsonLayer);
+    detailGeoJsonLayer = null;
+  }
+
+  // Mapping variabel berdasarkan tahun
+  const dataMap = {
+    chlorophyll: {
+      2022: typeof k22 !== "undefined" ? k22 : null,
+      2023: typeof k23 !== "undefined" ? k23 : null,
+      2024: typeof klor !== "undefined" ? klor : null,
+      2025: typeof k25 !== "undefined" ? k25 : null,
+    },
+    temp: {
+      // SPL
+      2022: typeof spl22 !== "undefined" ? spl22 : null,
+      2023: typeof s23 !== "undefined" ? s23 : null,
+      2024: typeof s24 !== "undefined" ? s24 : null,
+      2025: typeof s25 !== "undefined" ? s25 : null,
+    },
+    salinity: {
+      // TSS
+      2022: typeof t22 !== "undefined" ? t22 : null,
+      2023: typeof tss23 !== "undefined" ? tss23 : null,
+      2024: typeof t24 !== "undefined" ? t24 : null,
+      2025: typeof t25 !== "undefined" ? t25 : null,
+    },
+  };
+
+  const geojsonData = dataMap[varPrefix]
+    ? dataMap[varPrefix][parseInt(year)]
+    : null;
+
+  if (
+    !geojsonData ||
+    !geojsonData.features ||
+    geojsonData.features.length === 0
+  ) {
+    console.warn(`❌ Data ${paramName} untuk tahun ${year} tidak tersedia`);
+    return false;
+  }
+
+  // Buat layer GeoJSON
+  detailGeoJsonLayer = L.geoJSON(geojsonData, {
+    style: function (feature) {
+      return {
+        fillColor: getGeoJSONColor(feature.properties.gridcode),
+        color: "#000",
+        weight: 1.5,
+        fillOpacity: 0.65,
+      };
+    },
+    onEachFeature: function (feature, layer) {
+      const props = feature.properties;
+      const color = getGeoJSONColor(props.gridcode);
+      const label = getGeoJSONLabel(props.gridcode);
+
+      layer.bindPopup(
+        `
+        <div style="font-family: 'Poppins', sans-serif; padding: 10px; min-width: 220px;">
+          <div style="display: flex; align-items: center; margin-bottom: 12px;">
+            <div style="font-size: 24px; margin-right: 8px;">${emoji}</div>
+            <h3 style="margin: 0; color: ${color}; font-size: 1.2rem; font-weight: 600;">
+              ${title} ${year}
+            </h3>
+          </div>
+          <div style="background: #f5f5f5; padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+            <div style="margin-bottom: 8px;">
+              <strong style="color: #666;">Kategori:</strong>
+              <div style="display: inline-block; background: ${color}; color: white; padding: 4px 12px; border-radius: 4px; margin-left: 8px; font-weight: 600;">
+                ${label}
+              </div>
+            </div>
+            <div style="margin-top: 8px;">
+              <strong style="color: #666;">Luas Area:</strong>
+              <span style="margin-left: 8px; font-weight: 600; color: #333;">
+                ${props.Shape_Area ? props.Shape_Area.toFixed(2) : "N/A"} m²
+              </span>
+            </div>
+          </div>
+          <div style="font-size: 0.85em; color: #999; text-align: center; margin-top: 8px;">
+            📅 ${description} ${year}
+          </div>
+        </div>
+      `,
+        { maxWidth: 280, className: "custom-popup" }
+      );
+    },
+  }).addTo(detailMap);
+
+  if (detailGeoJsonLayer.getBounds().isValid()) {
+    detailMap.fitBounds(detailGeoJsonLayer.getBounds(), { padding: [20, 20] });
+  }
+
+  console.log(
+    `✅ Layer ${paramName} ${year} berhasil dimuat (${geojsonData.features.length} features)`
+  );
+  return true;
+};
