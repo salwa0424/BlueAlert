@@ -1544,37 +1544,41 @@ const createCharts = () => {
     },
   };
 
- // DO Chart
-// Menggunakan nilai konstan 8.4 untuk setiap tahun
-const doData = years.map(() => 8.4);
+  // DO Chart
+  const doData = years.map((year) => {
+    const yearData = allData.filter((d) => d.year == year);
+    return (
+      yearData.reduce((sum, d) => sum + parseFloat(d.do), 0) / yearData.length
+    ).toFixed(2);
+  });
 
-new Chart(document.getElementById("doChart"), {
-  ...chartConfig,
-  data: {
-    labels: years,
-    datasets: [
-      {
-        label: "Dissolved Oxygen (mg/L)",
-        data: doData, // Menggunakan array [8.4, 8.4, 8.4, 8.4]
-        borderColor: "#2c5f8d",
-        backgroundColor: "rgba(44, 95, 141, 0.2)",
-        tension: 0, // Garis lurus
-        borderWidth: 3,
-        pointRadius: 4,
-        pointBackgroundColor: "#2c5f8d",
-      },
-    ],
-  },
-});
+  new Chart(document.getElementById("doChart"), {
+    ...chartConfig,
+    data: {
+      labels: years,
+      datasets: [
+        {
+          label: "Dissolved Oxygen (mg/L)",
+          data: doData,
+          borderColor: "#2c5f8d",
+          backgroundColor: "rgba(44, 95, 141, 0.2)",
+          tension: 0.4,
+          borderWidth: 3,
+          pointRadius: 4,
+          pointBackgroundColor: "#2c5f8d",
+        },
+      ],
+    },
+  });
 
-// Temperature Chart
+  // Temperature Chart
   const tempData = years.map((year) => {
     const yearData = allData.filter((d) => d.year == year);
     return (
       yearData.reduce((sum, d) => sum + parseFloat(d.temp), 0) / yearData.length
     ).toFixed(1);
   });
-  
+
   new Chart(document.getElementById("tempChart"), {
     ...chartConfig,
     data: {
@@ -1887,5 +1891,3 @@ const loadGeoJSONLayer = (
   );
   return true;
 };
-
-
