@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Peta TSS 25 Pulau Merak Kecil</title>
+
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      #map {
+        width: 100vw;
+        height: 100vh;
+      }
+      .legend {
+        position: absolute;
+        bottom: 30px;
+        right: 30px;
+        background: #fff;
+        padding: 14px 16px;
+        border-radius: 7px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+      }
+      .legend h4 {
+        margin: 0 0 10px 0;
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 4px;
+      }
+      .legend-color {
+        width: 20px;
+        height: 20px;
+        margin-right: 8px;
+        border: 1px solid #333;
+        border-radius: 3px;
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <!-- Data GeoJSON -->
+    <script src="klor25.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+      function getColor(gridcode) {
+        switch (gridcode) {
+          case 1:
+            return "#0000FF"; // Biru - Sangat Rendah
+          case 2:
+            return "#00FFFF"; // Cyan - Rendah
+          case 3:
+            return "#00FF00"; // Hijau - Sedang
+          case 4:
+            return "#FFFF00"; // Kuning - Tinggi
+          case 5:
+            return "#FF0000"; // Merah - Sangat Tinggi
+          default:
+            return "#808080"; // Abu-abu - Tidak ada data
+        }
+      }
+      function getLabel(gridcode) {
+        switch (gridcode) {
+          case 1:
+            return "Sangat Rendah";
+          case 2:
+            return "Rendah";
+          case 3:
+            return "Sedang";
+          case 4:
+            return "Tinggi";
+          case 5:
+            return "Sangat Tinggi";
+          default:
+            return "Tidak ada data";
+        }
+      }
+
+      // Inisialisasi peta
+      const map = L.map("map").setView(
+        [-5.941153679576719, 105.9973314282567],
+        14
+      );
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "&copy; OpenStreetMap",
+      }).addTo(map);
+
+      // Tambahkan GeoJSON ke peta
+      if (typeof k25 !== "undefined") {
+        const layerGeoJson = L.geoJSON(k25, {
+          style: function (feature) {
+            return {
+              fillColor: getColor(feature.properties.gridcode),
+              color: "#000",
+              weight: 1,
+              fillOpacity: 0.7,
+            };
+          },
+          onEachFeature: function (feature, layer) {
+            const props = feature.properties;
+            layer.bindPopup(`
+            <div>
+              <b>Klorofil-a:</b> ${getLabel(props.gridcode)}<br>
+              <b>Luas:</b> ${props.Shape_Area.toFixed(2)} m²
+            </div>
+          `);
+          },
+        }).addTo(map);
+        map.fitBounds(layerGeoJson.getBounds());
+      }
+
+      // Tambahkan Legenda
+      const legend = L.control({ position: "bottomright" });
+      legend.onAdd = function () {
+        const div = L.DomUtil.create("div", "legend");
+        div.innerHTML = `<h4>Klorofil-a 2025</h4>`;
+        const grades = [1, 2, 3, 4, 5];
+        const labels = [
+          "Sangat Rendah",
+          "Rendah",
+          "Sedang",
+          "Tinggi",
+          "Sangat Tinggi",
+        ];
+        for (let i = 0; i < grades.length; i++) {
+          div.innerHTML += `
+          <div class="legend-item">
+            <div class="legend-color" style="background:${getColor(
+              grades[i]
+            )}"></div>
+            <span>${labels[i]}</span>
+          </div>
+        `;
+        }
+        return div;
+      };
+      legend.addTo(map);
+    </script>
+  </body>
+</html>
