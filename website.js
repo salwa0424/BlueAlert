@@ -1003,7 +1003,7 @@ const getParameterUnit = (param) => {
     case "temp":
       return "°C";
     case "salinity":
-      return "PSU";
+      return "mg/L";
     case "chlorophyll":
       return "μg/L";
     default:
@@ -1074,7 +1074,7 @@ const updateMap = (year) => {
             <div style="margin: 12px 0;">
               <p style="margin: 6px 0; font-size: 0.9rem;"><strong>💧 DO:</strong> ${avgData.do} mg/L</p>
               <p style="margin: 6px 0; font-size: 0.9rem;"><strong>🌡️ SPL:</strong> ${avgData.temp} °C</p>
-              <p style="margin: 6px 0; font-size: 0.9rem;"><strong>🌊 TSS:</strong> ${avgData.salinity} PSU</p>
+              <p style="margin: 6px 0; font-size: 0.9rem;"><strong>🌊 TSS:</strong> ${avgData.salinity} mg/L</p>
               <p style="margin: 6px 0; font-size: 0.9rem;"><strong>🌿 Klorofil-a:</strong> ${avgData.chlorophyll} μg/L</p>
             </div>
             <div style="margin: 12px 0; padding: 10px; background: ${status.color}; border-radius: 8px; text-align: center; color: white; font-weight: bold; font-size: 0.9rem;">
@@ -1891,3 +1891,4 @@ const loadGeoJSONLayer = (
   );
   return true;
 };
+
