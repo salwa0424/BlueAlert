@@ -1571,13 +1571,8 @@ const createCharts = () => {
     },
   });
 
-  // Temperature Chart
-  const tempData = years.map((year) => {
-    const yearData = allData.filter((d) => d.year == year);
-    return (
-      yearData.reduce((sum, d) => sum + parseFloat(d.temp), 0) / yearData.length
-    ).toFixed(1);
-  });
+// *** Kode ini akan membuat array data DO yang selalu 8.4 ***
+const doData = years.map(() => 8.4);
 
   new Chart(document.getElementById("tempChart"), {
     ...chartConfig,
@@ -1891,3 +1886,4 @@ const loadGeoJSONLayer = (
   );
   return true;
 };
+
